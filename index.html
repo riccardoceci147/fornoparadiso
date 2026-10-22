@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Forno Paradiso · Il pranzo di oggi</title>
+
+<!--
+  ================================================================
+   MENU DEL GIORNO — MODIFICA SOLO TRA LE DUE RIGHE QUI SOTTO
+  ================================================================
+   Come si scrive (una riga per piatto, come sulla lavagna):
+     # Titolo          -> titolo di un gruppo (può contenere il prezzo)
+     Nome piatto       -> un piatto
+     Nome | 12€        -> un piatto con il suo prezzo a destra
+     ! Testo           -> nota in evidenza in fondo
+   Le righe vuote non contano.
+  ================================================================
+-->
+<script type="text/plain" id="menu-del-giorno">
+
+# 10 €
+Zuppa di farro e legumi
+Lasagna / Parmigiana
+Risotto zucca e rosmarino
+
+# 12 €
+Lasagna "Paradiso"
+Polpette in umido + contorno
+Cotoletta con patate
+Polpette di melanzane + contorni
+
+! Il caffè è offerto!
+
+</script>
+<!-- ================================================================ -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#CC4635">
+<style>
+  :root{
+    --grano:#FDB94E; --lava:#CC4635; --golfo:#28A0CF; --vesuvio:#3C6F30;
+    --cream:#FFDFAC; --mozzarella:#FBF4E6; --cenere:#15110C;
+    --bd:2.5px solid var(--cenere);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{font-family:'Nunito',system-ui,sans-serif;font-weight:700;color:var(--cenere);
+    background:var(--cream);line-height:1.4;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:560px;margin:0 auto;padding:22px 16px 32px}
+  header{text-align:center}
+  .logo{width:132px;height:auto;margin:0 auto}
+  .chip{display:inline-block;margin-top:14px;background:var(--lava);color:var(--mozzarella);
+    padding:7px 16px;border-radius:30px;font-size:.74rem;font-weight:900;text-transform:uppercase;letter-spacing:.12em}
+  h1{font-weight:900;text-transform:uppercase;font-size:clamp(2.1rem,10vw,2.8rem);line-height:1;margin-top:10px}
+  h1 span{display:block;font-style:italic;color:var(--lava);text-transform:none;font-size:.8em}
+
+  .board{margin-top:22px;background:var(--mozzarella);border:var(--bd);border-radius:14px;
+    padding:6px 20px 18px;box-shadow:0 14px 30px -18px rgba(21,17,12,.5)}
+  .grp{display:flex;align-items:center;gap:12px;margin-top:18px}
+  .grp h2{font-weight:900;text-transform:uppercase;color:var(--lava);font-size:1.3rem;white-space:nowrap}
+  .grp .rule{flex:1;height:2.5px;background:var(--grano);border-radius:2px}
+  .dish{display:flex;align-items:baseline;gap:8px;padding:9px 0;border-bottom:1px dotted rgba(21,17,12,.25);font-size:1.08rem;font-weight:800}
+  .dish:last-child{border-bottom:0}
+  .dish .nm{flex:1}
+  .dish .pr{font-weight:900;color:var(--lava);white-space:nowrap}
+  .note{margin-top:18px;background:var(--grano);border:var(--bd);border-radius:14px;padding:14px 18px;
+    text-align:center;font-weight:900;text-transform:uppercase;letter-spacing:.03em;font-size:1.05rem}
+
+  .alg{margin-top:16px;font-size:.82rem;font-weight:700;color:#6a5a44;text-align:center}
+  footer{margin-top:26px;background:var(--vesuvio);color:var(--mozzarella);border-radius:14px;
+    padding:18px 16px;text-align:center}
+  footer .sedi{font-weight:900;text-transform:uppercase;letter-spacing:.04em}
+  footer .sedi b{color:var(--grano)}
+  footer .orari{font-size:.9rem;margin-top:4px;opacity:.92}
+  footer a{display:inline-block;margin-top:12px;color:var(--mozzarella);font-weight:900;text-decoration:none;
+    border:2px solid var(--mozzarella);border-radius:30px;padding:8px 18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img class="logo" src="logo.png" alt="Forno Paradiso">
+    <div><span class="chip">Il nostro pranzo</span></div>
+    <h1>Oggi<span>si mangia da Dio</span></h1>
+  </header>
+
+  <main class="board" id="board"></main>
+  <div id="notes"></div>
+
+  <p class="alg">Allergeni: chiedi al nostro personale, ti diciamo tutto su ogni piatto.</p>
+
+  <footer>
+    <div class="sedi">Segrate <b>●</b> Milano · Benedetto Marcello</div>
+    <div class="orari">Lunedì–Sabato · 12:00–15:00 · anche da asporto</div>
+    <a href="https://www.instagram.com/fornoparadiso/" target="_blank" rel="noopener">Seguici su Instagram</a>
+  </footer>
+</div>
+
+<script>
+(function(){
+  var src = document.getElementById('menu-del-giorno').textContent;
+  var board = document.getElementById('board'), notes = document.getElementById('notes');
+  function el(tag, cls, text){ var e=document.createElement(tag); if(cls) e.className=cls; if(text!=null) e.textContent=text; return e; }
+  src.split('\n').forEach(function(raw){
+    var line = raw.trim();
+    if(!line) return;
+    if(line.charAt(0)==='#'){
+      var g = el('div','grp'); g.appendChild(el('h2',null,line.replace(/^#+\s*/,''))); g.appendChild(el('span','rule'));
+      board.appendChild(g); return;
+    }
+    if(line.charAt(0)==='!'){ notes.appendChild(el('div','note',line.replace(/^!\s*/,''))); return; }
+    var parts = line.split('|'), d = el('div','dish');
+    d.appendChild(el('span','nm',parts[0].trim()));
+    if(parts.length>1 && parts[1].trim()) d.appendChild(el('span','pr',parts.slice(1).join('|').trim()));
+    board.appendChild(d);
+  });
+})();
+</script>
+</body>
+</html>

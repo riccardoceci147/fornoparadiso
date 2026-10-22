@@ -12,7 +12,7 @@
    Come si scrive (una riga per piatto):
      Nome piatto | 10      -> piatto e prezzo (il simbolo € lo mette la pagina)
      Nome piatto | 2,50    -> i centesimi si scrivono con la virgola
-     # Dolci               -> titolo di una sezione (facoltativo)
+     # Primi               -> titolo di una sezione (Primi, Secondi, Dolci...)
      ! Testo               -> nota nel timbro in fondo
    Quello che segue un "+" (es. "+ contorno") esce più piccolo.
    Le righe vuote non contano.
@@ -20,10 +20,14 @@
 -->
 <script type="text/plain" id="menu-del-giorno">
 
+# Primi
 Zuppa di farro e legumi | 10
-Lasagna / Parmigiana | 10
+Lasagna | 10
 Risotto zucca e rosmarino | 10
 Lasagna "Paradiso" | 12
+
+# Secondi
+Parmigiana | 10
 Polpette in umido + contorno | 12
 Cotoletta con patate | 12
 Polpette di melanzane + contorni | 12
@@ -60,28 +64,36 @@ Polpette di melanzane + contorni | 12
     font-variation-settings:"opsz" 144}
   h1 em{font-weight:400;font-style:italic;color:var(--lava)}
 
-  /* piatti: nome a sinistra, prezzo a destra */
-  .gruppi{margin-top:30px;border-top:2px solid var(--cenere);border-bottom:2px solid var(--cenere);padding:8px 0}
-  .gruppo + .gruppo{border-top:1px solid rgba(21,17,12,.2)}
-  .titolo{font-family:'Nunito',sans-serif;font-weight:900;font-size:.8rem;letter-spacing:.18em;
-    text-transform:uppercase;color:var(--lava);padding:16px 0 2px}
-  .gruppo ul{list-style:none}
-  .gruppo li{display:flex;align-items:baseline;gap:14px;padding:12px 0;font-size:1.22rem;
-    font-weight:500;line-height:1.2}
-  .gruppo li + li{border-top:1px dotted rgba(21,17,12,.28)}
-  .gruppo li .nm{flex:1}
-  .gruppo li .agg{display:block;font-style:italic;font-weight:400;font-size:.92rem;color:var(--seppia);margin-top:3px}
-  .gruppo li .pr{font-weight:700;color:var(--lava);white-space:nowrap;font-variant-numeric:lining-nums tabular-nums;
+  /* sezioni: titolo in corsivo tra due filetti, con il sole del logo */
+  .gruppi{margin-top:34px}
+  .gruppo + .gruppo{margin-top:34px}
+  .titolo{display:flex;align-items:center;gap:14px;margin-bottom:10px;
+    font-weight:400;font-style:italic;font-size:2rem;line-height:1;color:var(--lava);
     font-variation-settings:"opsz" 144}
+  .titolo::before,.titolo::after{content:"";flex:1;height:1px;background:var(--cenere);opacity:.55}
+  .titolo span{display:flex;align-items:center;gap:10px}
+  .titolo span::before{content:"";width:9px;height:9px;background:var(--grano);transform:rotate(45deg);flex:0 0 auto}
+
+  /* piatti: nome · puntini · prezzo, come su un menu stampato */
+  .gruppo ul{list-style:none}
+  .gruppo li{padding:11px 0}
+  .riga{display:flex;align-items:baseline;gap:8px}
+  .riga .nm{font-size:1.2rem;font-weight:500;line-height:1.25}
+  .riga .puntini{flex:1;min-width:18px;border-bottom:1.5px dotted rgba(21,17,12,.35);transform:translateY(-5px)}
+  .riga .pr{font-size:1.2rem;font-weight:500;white-space:nowrap;font-variant-numeric:lining-nums;
+    font-variation-settings:"opsz" 144}
+  .riga .pr small{font-size:1em;color:var(--lava);margin-left:3px}
+  .gruppo li .agg{display:block;font-style:italic;font-weight:400;font-size:.95rem;color:var(--seppia);margin-top:3px}
 
   @media (max-width:420px){
     .foglio{border-width:7px 7px 0;padding:26px 18px 0}
     .mare,footer{margin-left:-18px;margin-right:-18px}
-    .gruppo li{font-size:1.12rem}
+    .riga .nm,.riga .pr{font-size:1.1rem}
+    .titolo{font-size:1.8rem}
   }
 
   /* timbro per la nota */
-  .timbri{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;margin-top:30px}
+  .timbri{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;margin-top:40px}
   .timbro{transform:rotate(-4deg);border:2.5px solid var(--lava);outline:1.5px solid var(--lava);outline-offset:3px;
     color:var(--lava);padding:9px 16px;font-family:'Nunito',sans-serif;font-weight:900;text-transform:uppercase;
     letter-spacing:.08em;font-size:.95rem;text-align:center}
@@ -127,10 +139,10 @@ Polpette di melanzane + contorni | 12
   var lista = null;
   function el(tag, cls, testo){ var e=document.createElement(tag); if(cls) e.className=cls; if(testo!=null) e.textContent=testo; return e; }
   function bello(t){ return t.replace(/"([^"]*)"/g,'“$1”').replace(/'/g,'’'); }
-  function euro(p){ p = p.replace(/€/g,'').trim(); return p ? p + ' €' : ''; }
+  function euro(p){ return p.replace(/€/g,'').trim(); }
   function nuovoGruppo(titolo){
     var g = el('section','gruppo');
-    if(titolo) g.appendChild(el('h2','titolo',titolo));
+    if(titolo){ var h = el('h2','titolo'); h.appendChild(el('span',null,titolo)); g.appendChild(h); }
     lista = el('ul'); g.appendChild(lista); menu.appendChild(g);
   }
   righe.forEach(function(r){
@@ -140,10 +152,15 @@ Polpette di melanzane + contorni | 12
     if(t.charAt(0)==='!'){ note.appendChild(el('div','timbro',bello(t.replace(/^!\s*/,'')))); return; }
     if(!lista) nuovoGruppo('');
     var parti = t.split('|'), nome = bello(parti[0].trim()), li = el('li');
-    var piu = nome.indexOf(' + '), nm = el('span','nm', piu>0 ? nome.slice(0,piu) : nome);
-    if(piu>0) nm.appendChild(el('span','agg', 'con ' + nome.slice(piu+3)));
-    li.appendChild(nm);
-    if(parti.length>1 && euro(parti[1])) li.appendChild(el('span','pr',euro(parti[1])));
+    var piu = nome.indexOf(' + '), riga = el('div','riga');
+    riga.appendChild(el('span','nm', piu>0 ? nome.slice(0,piu) : nome));
+    var prezzo = parti.length>1 ? euro(parti[1]) : '';
+    if(prezzo){
+      riga.appendChild(el('span','puntini'));
+      var pr = el('span','pr',prezzo); pr.appendChild(el('small',null,'€')); riga.appendChild(pr);
+    }
+    li.appendChild(riga);
+    if(piu>0) li.appendChild(el('span','agg', 'con ' + nome.slice(piu+3)));
     lista.appendChild(li);
   });
 })();

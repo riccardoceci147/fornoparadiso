@@ -81,6 +81,14 @@ Polpette di melanzane + contorni
   .gruppo li .agg{display:block;font-style:italic;font-weight:400;font-size:.92rem;color:var(--seppia);margin-top:2px}
   .gruppo li .pr{font-weight:700;color:var(--lava);white-space:nowrap}
 
+  @media (max-width:420px){
+    .foglio{border-width:7px 7px 0;padding:26px 18px 0}
+    .mare,footer{margin-left:-18px;margin-right:-18px}
+    .gruppo{grid-template-columns:54px 1fr;gap:0 12px}
+    .prezzo{font-size:2.4rem}
+    .gruppo li{font-size:1.1rem}
+  }
+
   /* timbro per la nota */
   .timbri{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;margin-top:30px}
   .timbro{transform:rotate(-4deg);border:2.5px solid var(--lava);outline:1.5px solid var(--lava);outline-offset:3px;
